@@ -1,0 +1,42 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./cyclone_backend
+      dockerfile: Dockerfile
+    container_name: cyclone-ai-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - backend_data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    networks:
+      - cyclone-network
+
+  dashboard:
+    build:
+      context: ./cyclone-dashboard
+      dockerfile: Dockerfile
+    container_name: cyclone-ai-dashboard
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - cyclone-network
+
+networks:
+  cyclone-network:
+    driver: bridge
+
+volumes:
+  backend_data:
