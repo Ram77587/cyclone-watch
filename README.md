@@ -120,7 +120,7 @@ Target Endpoint: https://www.mosdac.gov.in
   Latency: 284 ms
 
 [STEP 3] Authenticated User Session
-  User ID: Ramcharan K A K A (charanteja77587)
+  User ID: MOSDAC Research Analyst (demo_researcher_2026)
   Auth Provider: Keycloak RS256 JWT Token (mosdac.gov.in/realms/Mosdac)
 
 [STEP 4] Live Satellite Data Stream

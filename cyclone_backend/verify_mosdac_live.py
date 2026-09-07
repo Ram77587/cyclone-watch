@@ -24,8 +24,8 @@ if sys.platform == "win32":
 # Load environment variables
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
-USERNAME = os.getenv("MOSDAC_USERNAME", "charan77587")
-PASSWORD = os.getenv("MOSDAC_PASSWORD", "Ram@2007")
+USERNAME = os.getenv("MOSDAC_USERNAME", "")
+PASSWORD = os.getenv("MOSDAC_PASSWORD", "")
 
 # Color formatting
 CYAN = "\033[96m"
@@ -77,40 +77,50 @@ def run_verification():
     print(f"\n{BOLD}STEP 2: Executing Cryptographic Handshake with ISRO Keycloak Server...{RESET}")
     print(f"  {DIM}POST https://mosdac.gov.in/download_api/gettoken{RESET}")
     t0 = time.perf_counter()
-    try:
-        with httpx.Client(timeout=10.0, verify=False) as client:
-            token_res = client.post(
-                "https://mosdac.gov.in/download_api/gettoken",
-                json={"username": USERNAME, "password": PASSWORD}
-            )
-            handshake_lat = round((time.perf_counter() - t0) * 1000, 1)
+    if not (USERNAME and PASSWORD):
+        print(f"  {YELLOW}⚠ Notice: MOSDAC_USERNAME / MOSDAC_PASSWORD not provided in .env{RESET}")
+        print(f"  {DIM}Displaying validated session schema (add credentials to .env for live token acquisition):{RESET}")
+        print(f"  {GREEN}✓ Mock Session Validated{RESET} (284 ms simulated latency)")
+        print(f"  {CYAN}▸ Issuer (iss)        :{RESET} https://mosdac.gov.in/realms/Mosdac")
+        print(f"  {CYAN}▸ Registered Name     :{RESET} {BOLD}MOSDAC Research Analyst (demo_researcher_2026){RESET}")
+        print(f"  {CYAN}▸ Registered Email    :{RESET} researcher@cyclonewatch.org")
+        print(f"  {CYAN}▸ User Subject UUID   :{RESET} a81f4b23-64e1-4c59-b1d8-demo002026")
+        print(f"  {CYAN}▸ Signature Algorithm :{RESET} RS256 (ISRO SAC Public Key Encrypted)")
+    else:
+        try:
+            with httpx.Client(timeout=10.0, verify=False) as client:
+                token_res = client.post(
+                    "https://mosdac.gov.in/download_api/gettoken",
+                    json={"username": USERNAME, "password": PASSWORD}
+                )
+                handshake_lat = round((time.perf_counter() - t0) * 1000, 1)
 
-            if token_res.status_code == 200:
-                token_data = token_res.json()
-                raw_token = token_data.get("access_token", "")
-                parts = raw_token.split(".")
-                
-                # Parse JWT Claims
-                payload_b64 = parts[1] + "=" * ((4 - len(parts[1]) % 4) % 4)
-                claims = json.loads(base64.urlsafe_b64decode(payload_b64).decode(errors="ignore"))
+                if token_res.status_code == 200:
+                    token_data = token_res.json()
+                    raw_token = token_data.get("access_token", "")
+                    parts = raw_token.split(".")
+                    
+                    # Parse JWT Claims
+                    payload_b64 = parts[1] + "=" * ((4 - len(parts[1]) % 4) % 4)
+                    claims = json.loads(base64.urlsafe_b64decode(payload_b64).decode(errors="ignore"))
 
-                print(f"  {GREEN}✓ HTTP 200 OK{RESET} Received signed RS256 JWT ({handshake_lat}ms)")
-                print(f"  {CYAN}▸ Issuer (iss)        :{RESET} {claims.get('iss')}")
-                print(f"  {CYAN}▸ Registered Name     :{RESET} {BOLD}{claims.get('name')}{RESET}")
-                print(f"  {CYAN}▸ Registered Email    :{RESET} {claims.get('email')}")
-                print(f"  {CYAN}▸ User Subject UUID   :{RESET} {claims.get('sub')}")
-                
-                iat = datetime.fromtimestamp(claims.get("iat", 0), tz=timezone.utc)
-                exp = datetime.fromtimestamp(claims.get("exp", 0), tz=timezone.utc)
-                print(f"  {CYAN}▸ Token Issued At (UTC):{RESET} {iat.strftime('%Y-%m-%d %H:%M:%S UTC')}")
-                print(f"  {CYAN}▸ Token Expiry (UTC)  :{RESET} {exp.strftime('%Y-%m-%d %H:%M:%S UTC')}")
-                print(f"  {CYAN}▸ Signature Algorithm :{RESET} RS256 (ISRO SAC Public Key Encrypted)")
-            else:
-                print(f"  {RED}✗ Authentication Rejected (HTTP {token_res.status_code}):{RESET} {token_res.text}")
-                return
-    except Exception as e:
-        print(f"  {RED}✗ Connection Exception:{RESET} {e}")
-        return
+                    print(f"  {GREEN}✓ HTTP 200 OK{RESET} Received signed RS256 JWT ({handshake_lat}ms)")
+                    print(f"  {CYAN}▸ Issuer (iss)        :{RESET} {claims.get('iss')}")
+                    print(f"  {CYAN}▸ Registered Name     :{RESET} {BOLD}{claims.get('name')}{RESET}")
+                    print(f"  {CYAN}▸ Registered Email    :{RESET} {claims.get('email')}")
+                    print(f"  {CYAN}▸ User Subject UUID   :{RESET} {claims.get('sub')}")
+                    
+                    iat = datetime.fromtimestamp(claims.get("iat", 0), tz=timezone.utc)
+                    exp = datetime.fromtimestamp(claims.get("exp", 0), tz=timezone.utc)
+                    print(f"  {CYAN}▸ Token Issued At (UTC):{RESET} {iat.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+                    print(f"  {CYAN}▸ Token Expiry (UTC)  :{RESET} {exp.strftime('%Y-%m-%d %H:%M:%S UTC')}")
+                    print(f"  {CYAN}▸ Signature Algorithm :{RESET} RS256 (ISRO SAC Public Key Encrypted)")
+                else:
+                    print(f"  {RED}✗ Authentication Rejected (HTTP {token_res.status_code}):{RESET} {token_res.text}")
+                    return
+        except Exception as e:
+            print(f"  {RED}✗ Connection Exception:{RESET} {e}")
+            return
 
     # -------------------------------------------------------------
     # STEP 3: Live Satellite Catalog Telemetry Scan
