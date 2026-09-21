@@ -303,7 +303,10 @@ export default function ProximityAlertScanner({ activeCyclone }) {
                 Action Directives & Standard Operating Procedures (NDRF/SDMA):
               </span>
               <ul className="mt-1 space-y-1 text-[11px] text-slate-800 dark:text-slate-200 list-disc list-inside">
-                {assessedResult.directives?.map((dir, idx) => (
+                {(Array.isArray(assessedResult.directives)
+                  ? assessedResult.directives
+                  : [assessedResult.directives]
+                ).filter(Boolean).map((dir, idx) => (
                   <li key={idx} className="leading-tight">{dir}</li>
                 ))}
               </ul>

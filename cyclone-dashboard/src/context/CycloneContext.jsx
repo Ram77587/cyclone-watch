@@ -2,14 +2,15 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getActiveCyclone } from "../api/cycloneApi";
 import { getAlerts } from "../api/alertsApi";
+import { mockCycloneDetail, mockAlerts } from "../mockData";
 
 const CycloneContext = createContext(null);
 
 export function CycloneProvider({ children }) {
-  const [activeCyclone, setActiveCyclone] = useState(null);
-  const [alerts, setAlerts] = useState([]);
+  const [activeCyclone, setActiveCyclone] = useState(mockCycloneDetail);
+  const [alerts, setAlerts] = useState(mockAlerts);
   const [isLiveBackend, setIsLiveBackend] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   const [theme, setTheme] = useState(() => {
@@ -33,13 +34,12 @@ export function CycloneProvider({ children }) {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
   };
 
-  // Sync with FastAPI
+  // Sync with FastAPI backend if available
   useEffect(() => {
     let isMounted = true;
 
     async function syncBackend() {
       try {
-        setLoading(true);
         const [cycloneData, alertData] = await Promise.all([
           getActiveCyclone(),
           getAlerts(),
@@ -48,7 +48,8 @@ export function CycloneProvider({ children }) {
         if (isMounted) {
           if (cycloneData) setActiveCyclone(cycloneData);
           if (alertData && alertData.length > 0) setAlerts(alertData);
-          setIsLiveBackend(true);
+          // Check if response was from live server
+          setIsLiveBackend(cycloneData?.id && cycloneData?.status !== "HISTORICAL ARCHIVE");
           setError(null);
         }
       } catch (err) {
@@ -57,8 +58,6 @@ export function CycloneProvider({ children }) {
           setIsLiveBackend(false);
           setError(err.message);
         }
-      } finally {
-        if (isMounted) setLoading(false);
       }
     }
 
@@ -79,7 +78,7 @@ export function CycloneProvider({ children }) {
       return cycloneData;
     } catch (err) {
       console.error("Failed to refresh cyclone data:", err);
-      return null;
+      return activeCyclone || mockCycloneDetail;
     }
   };
 
