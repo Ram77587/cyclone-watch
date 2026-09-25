@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tropical Cyclone AI Research & Operational Forecasting Workbench</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#1E293B',
+                            900: '#0F172A',
+                            950: '#0B1E2D',
+                        },
+                        storm: {
+                            teal: '#0EA5E9',
+                            amber: '#F59E0B',
+                            red: '#EF4444',
+                            emerald: '#10B981',
+                            indigo: '#6366F1'
+                        },
+                        sand: '#F8F9FA'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['IBM Plex Mono', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Embedded chart container constraints */
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 680px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 360px;
+            }
+        }
+        .pressure-ring {
+            animation: pulse-ring 3s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); opacity: 0.8; }
+            50% { transform: scale(1.15); opacity: 0.3; }
+            100% { transform: scale(0.95); opacity: 0.8; }
+        }
+        /* Custom scrollbar for data tables */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #F1F5F9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #CBD5E1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94A3B8;
+        }
+    </style>
+</head>
+<body class="bg-sand text-slate-800 font-sans antialiased min-h-screen flex flex-col selection:bg-storm-teal selection:text-white">
+
+    <!-- Chosen Palette: Warm Meteorological Slate & Crisp Ocean (Warm Off-White #F8F9FA, Deep Navy #0B1E2D, Ocean Blue #0EA5E9, Warning Amber #F59E0B, Crimson #EF4444) -->
+    <!-- Application Structure Plan: Designed as a 5-module dynamic workspace: 1. Executive Synthesis & Baseline Analysis, 2. Literature Architecture Benchmarks (Interactive Filterable Models), 3. Dynamic Spatiotemporal Tracking Mechanics (Interactive Gaussian Kernel Sub-grid Simulator), 4. IMD Forecast Baseline & Socio-Economic Matrix (Lead-time comparison tool & mortality trends), 5. SIH 3-Model Operational Architecture Workbench. This non-linear thematic navigation allows researchers and operational meteorologists to seamlessly explore both foundational theory and real-time operational AI pipeline designs. -->
+    <!-- Visualization & Content Choices: Model performance metrics -> Goal: Compare -> Grouped Bar/Line Chart (Chart.js); IMD Track Errors -> Goal: Horizon Trend -> Dynamic Grouped Bar Chart (Chart.js); Extreme Weather Mortality -> Goal: Inform/Trend -> Doughnut/Pie & Stat Counters (Chart.js & JS dynamic DOM); Sub-grid Continuous Tracking -> Goal: Demonstrate -> Interactive HTML5 Canvas Interactive Heatmap Demonstrator. NO SVG/Mermaid used. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <!-- Top Alert Banner -->
+    <div id="alert-banner" class="bg-amber-600 text-white text-xs md:text-sm font-medium py-2 px-4 shadow-md flex items-center justify-between transition-all duration-300">
+        <div class="container mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
+                <span class="font-mono font-bold uppercase tracking-wider">RSMC NEW DELHI OPERATIONAL ADVISORY:</span>
+                <span>North Indian Ocean Deep Depression | Pre-Monsoon Transition Active</span>
+            </div>
+            <button onclick="document.getElementById('alert-banner').style.display='none'" class="text-white hover:text-amber-200 font-bold ml-4 text-base">&times;</button>
+        </div>
+    </div>
+
+    <!-- Main Navigation Header -->
+    <header class="bg-navy-950 text-white sticky top-0 z-50 shadow-xl border-b border-slate-800">
+        <div class="container mx-auto px-4 py-3 flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="relative flex items-center justify-center w-10 h-10 rounded-full bg-navy-800 border border-storm-teal/40">
+                    <div class="absolute w-8 h-8 rounded-full border border-storm-teal/60 pressure-ring"></div>
+                    <span class="font-mono font-bold text-storm-teal text-lg">🌀</span>
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-xl font-bold tracking-tight flex items-center gap-2">
+                        CYCLONE AI RESEARCH <span class="bg-storm-teal/20 text-storm-teal text-xs font-mono px-2 py-0.5 rounded border border-storm-teal/30">SIH 2026</span>
+                    </h1>
+                    <p class="text-xs text-slate-400">Deep Learning Literature Synthesis & Operational AI Workbench</p>
+                </div>
+            </div>
+
+            <!-- Dynamic Tab Navigation -->
+            <nav class="flex flex-wrap items-center gap-1 text-xs md:text-sm font-medium">
+                <button onclick="switchTab('overview')" id="nav-overview" class="nav-btn px-3 py-1.5 rounded-md transition-colors bg-storm-teal text-white">Overview & Dvorak</button>
+                <button onclick="switchTab('models')" id="nav-models" class="nav-btn px-3 py-1.5 rounded-md transition-colors text-slate-300 hover:text-white hover:bg-navy-800">AI Architectures</button>
+                <button onclick="switchTab('spatiotemporal')" id="nav-spatiotemporal" class="nav-btn px-3 py-1.5 rounded-md transition-colors text-slate-300 hover:text-white hover:bg-navy-800">Spatiotemporal Mechanics</button>
+                <button onclick="switchTab('imd-impact')" id="nav-imd-impact" class="nav-btn px-3 py-1.5 rounded-md transition-colors text-slate-300 hover:text-white hover:bg-navy-800">IMD & Impact</button>
+                <button onclick="switchTab('sih-pipeline')" id="nav-sih-pipeline" class="nav-btn px-3 py-1.5 rounded-md transition-colors text-slate-300 hover:text-white hover:bg-navy-800">Operational Pipeline</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container Content -->
+    <main class="container mx-auto px-4 py-6 flex-grow">
+
+        <!-- ================= SECTION 1: OVERVIEW & DVORAK TRANSITION ================= -->
+        <section id="section-overview" class="space-y-6">
+            <!-- Section Intro Paragraph -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h2 class="text-2xl font-bold text-navy-950 mb-2 border-b pb-2 flex items-center justify-between">
+                    <span>Theoretical Foundations & Operational Paradigms</span>
+                    <span class="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-1 rounded">Module 01</span>
+                </h2>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Operational tropical cyclone (TC) monitoring traditionally relied upon empirical pattern recognition from satellite observations. This module explores the evolution from Vernon Dvorak's baseline framework (1969–1984) to modern algorithmic automation via the Advanced Dvorak Technique (ADT) and automated deep feature representations. Use the interactive controls below to compare traditional empirical rules against modern deep convolutional networks across physical indicators like eye-eyewall brightness temperature differentials ($\Delta T_b$), rotational invariance, and latency factors during Rapid Intensification (RI).
+                </p>
+            </div>
+
+            <!-- Empirical Dvorak vs ADT vs Deep AI Metric Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-sm hover:border-storm-teal transition-all">
+                    <div class="text-xs font-mono text-slate-500 uppercase tracking-wider mb-1">Dvorak T-Number Scale</div>
+                    <div class="text-2xl font-bold font-mono text-navy-950">T1.0 – T8.0</div>
+                    <div class="text-xs text-slate-600 mt-1">Converted via empirical lookup tables to MSW (kts) and MSLP (hPa).</div>
+                    <div class="mt-3 text-xs bg-amber-50 text-amber-800 p-2 rounded border border-amber-200">
+                        <strong>Constraint:</strong> Manual execution, inter-analyst variance, ~50% within $\pm 5\text{ kts}$.
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-sm hover:border-storm-teal transition-all">
+                    <div class="text-xs font-mono text-slate-500 uppercase tracking-wider mb-1">Advanced Dvorak (ADT)</div>
+                    <div class="text-2xl font-bold font-mono text-storm-teal">6-12 Hour</div>
+                    <div class="text-xs text-slate-600 mt-1">Operational latency due to strict 6-hour moving average constraints.</div>
+                    <div class="mt-3 text-xs bg-red-50 text-red-800 p-2 rounded border border-red-200">
+                        <strong>Limitation:</strong> Delays detection of Rapid Intensification (RI) during critical pre-landfall cycles.
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-sm hover:border-storm-teal transition-all">
+                    <div class="text-xs font-mono text-slate-500 uppercase tracking-wider mb-1">CNN-TC Invariance</div>
+                    <div class="text-2xl font-bold font-mono text-storm-emerald">4.06 m/s</div>
+                    <div class="text-xs text-slate-600 mt-1">Best RMSE ($7.89\text{ kts}$) achieved via rotation-blended convolutional sampling.</div>
+                    <div class="mt-3 text-xs bg-emerald-50 text-emerald-800 p-2 rounded border border-emerald-200">
+                        <strong>Advantage:</strong> Eliminates human scene categorization; matches SATCON consensus platform.
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-lg p-4 border border-slate-200 shadow-sm hover:border-storm-teal transition-all">
+                    <div class="text-xs font-mono text-slate-500 uppercase tracking-wider mb-1">TCICENet Resolution</div>
+                    <div class="text-2xl font-bold font-mono text-storm-indigo">170 × 170</div>
+                    <div class="text-xs text-slate-600 mt-1">Optimal IR pixel spatial crop for cascaded classification + regression.</div>
+                    <div class="mt-3 text-xs bg-indigo-50 text-indigo-800 p-2 rounded border border-indigo-200">
+                        <strong>Dataset:</strong> 1,001 TCs (1981–2019) in Northwest Pacific; RMSE $8.60\text{ kts}$.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Deep Dive Tabbed Analytical Matrix -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 mb-4 gap-3">
+                    <h3 class="text-lg font-bold text-navy-950">Empirical Rules vs. Autonomous Deep Feature Learning</h3>
+                    <div class="flex space-x-2">
+                        <button onclick="toggleDvorakView('dvorak')" id="btn-view-dvorak" class="px-3 py-1 text-xs font-semibold rounded bg-navy-950 text-white">Dvorak / ADT Paradigm</button>
+                        <button onclick="toggleDvorakView('deep-learning')" id="btn-view-dl" class="px-3 py-1 text-xs font-semibold rounded bg-slate-100 text-slate-700 hover:bg-slate-200">Deep Learning Shift</button>
+                    </div>
+                </div>
+
+                <div id="dvorak-content" class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <h4 class="font-bold text-sm text-navy-950 mb-2 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                                Classic Dvorak Technique (VDT)
+                            </h4>
+                            <ul class="text-xs text-slate-600 space-y-2 list-disc pl-4">
+                                <li><strong>Cloud Feature Mapping:</strong> Evaluates curved banding arcs, central dense overcast (CDO), shear, and eye pattern geometry.</li>
+                                <li><strong>Index Scale:</strong> Assigns $T$-number ($T1.0$ to $T8.0$ at $0.5$ steps), converted to Current Intensity ($CI$).</li>
+                                <li><strong>Operational Sensitivity:</strong> High subjectivity and inter-analyst variance ($\pm 5\text{ kts}$ error rate in ~50% cases).</li>
+                                <li><strong>Failure Modes:</strong> High cirrus canopies obscuring low-level circulation centers (LLCC); data-sparse basins like the North Indian Ocean.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <h4 class="font-bold text-sm text-navy-950 mb-2 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-storm-teal"></span>
+                                Advanced Dvorak Technique (ADT)
+                            </h4>
+                            <ul class="text-xs text-slate-600 space-y-2 list-disc pl-4">
+                                <li><strong>Automated Computation:</strong> Automated center identification; calculates brightness temperature ($T_b$) differentials between eye and eyewall.</li>
+                                <li><strong>Smoothing Constraints:</strong> Imposes a strict 6-hour moving-average filter to eliminate unphysical high-frequency fluctuations.</li>
+                                <li><strong>Operational Bottleneck:</strong> The 6-hour moving average introduces a 6-to-12-hour latency during Rapid Intensification (RI) events.</li>
+                                <li><strong>Recon Dependency:</strong> Re-calibration required in basins without routine aircraft reconnaissance.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dl-content" class="hidden space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <h4 class="font-bold text-sm text-navy-950 mb-2 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-storm-emerald"></span>
+                                Representation Learning (Pradhan et al. & CNN-TC)
+                            </h4>
+                            <ul class="text-xs text-slate-600 space-y-2 list-disc pl-4">
+                                <li><strong>Direct Radiometer Ingestion:</strong> End-to-end 2D-CNNs extract spatial features directly from geostationary infrared imagery without manual rules.</li>
+                                <li><strong>Rotational Invariance:</strong> Rotation-blended CNNs (Chen et al., 2019) sample multi-angle IR fields to handle cyclonic rotational symmetry.</li>
+                                <li><strong>Performance Benchmark:</strong> Achieved intensity estimation RMSE of $4.06\text{ m/s}$ ($7.89\text{ kts}$) and MAE of $3.23\text{ m/s}$.</li>
+                                <li><strong>Consensus Parity:</strong> Performance matches or exceeds ADT and SATCON platform consensus estimates.</li>
+                            </ul>
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <h4 class="font-bold text-sm text-navy-950 mb-2 flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-storm-indigo"></span>
+                                Cascaded Stage Architecture (TCICENet)
+                            </h4>
+                            <ul class="text-xs text-slate-600 space-y-2 list-disc pl-4">
+                                <li><strong>Decoupled Network Tasks:</strong> Separates intensity analysis into TCIC (Classification) and TCIE (Regression) modules.</li>
+                                <li><strong>Stage Specialization:</strong> Categorizes systems into developmental regimes prior to running fine-grained wind regression.</li>
+                                <li><strong>Spatial Optimization:</strong> Rigorous evaluation showed $170 \times 170\text{ pixels}$ spatial crop provides optimal vortex envelope context.</li>
+                                <li><strong>Validation Scale:</strong> Validated over 1,001 cyclones (1981–2019) in NW Pacific ($\text{RMSE} = 8.60\text{ kts}$, $\text{MAE} = 6.67\text{ kts}$).</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SECTION 2: AI MODEL ARCHITECTURES & BENCHMARK COMPARISON ================= -->
+        <section id="section-models" class="hidden space-y-6">
+            <!-- Section Intro Paragraph -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h2 class="text-2xl font-bold text-navy-950 mb-2 border-b pb-2 flex items-center justify-between">
+                    <span>Literature Deep Learning Architectures & Benchmark Comparison</span>
+                    <span class="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-1 rounded">Module 02</span>
+                </h2>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    This section presents a systematic synthesis of state-of-the-art deep learning models for tropical cyclone analysis across satellite radiometry, spatial vortex localization, dynamic intensity regression, and tropical cyclogenesis. Filter the interactive architecture matrix below or inspect the benchmark chart to evaluate performance metrics ($\text{RMSE}$, $\text{MAE}$, detection rates) across distinct input sources (IR, Microwave, Scatterometer, Reanalysis).
+                </p>
+            </div>
+
+            <!-- Architectural Filter & Chart Controls -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                    <div>
+                        <h3 class="font-bold text-navy-950 text-base">Intensity Estimation Benchmark Comparison (MAE / RMSE)</h3>
+                        <p class="text-xs text-slate-500">Lower values indicate higher precision against best-track ground truth</p>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <label class="text-xs font-medium text-slate-600">Filter Architecture:</label>
+                        <select id="model-filter" onchange="filterModelBenchmark()" class="text-xs bg-slate-50 border border-slate-300 rounded px-2 py-1 font-mono focus:outline-none focus:ring-1 focus:ring-storm-teal">
+                            <option value="all">All Architectures</option>
+                            <option value="cnn">Convolutional Networks (CNN)</option>
+                            <option value="transformer">Vision Transformers (ViT)</option>
+                            <option value="hybrid">Hybrid Spatiotemporal (ConvLSTM)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Chart.js Container -->
+                <div class="chart-container">
+                    <canvas id="modelBenchmarkChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Complete Literature Model Table -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-4">
+                <h3 class="font-bold text-navy-950 text-base border-b pb-2">Synthesis of Literature Models & Technical Formulations</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-700 border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-900 border-b border-slate-300 font-mono">
+                                <th class="p-3">Model / Reference</th>
+                                <th class="p-3">Core Architecture</th>
+                                <th class="p-3">Input Data Sources</th>
+                                <th class="p-3">Training / Scale</th>
+                                <th class="p-3">Performance Metrics</th>
+                                <th class="p-3">Key Technical Innovation</th>
+                            </tr>
+                        </thead>
+                        <tbody id="model-table-body" class="divide-y divide-slate-200">
+                            <!-- Populated dynamically via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SECTION 3: SPATIOTEMPORAL MECHANICS & TRACK DYNAMICS ================= -->
+        <section id="section-spatiotemporal" class="hidden space-y-6">
+            <!-- Section Intro Paragraph -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h2 class="text-2xl font-bold text-navy-950 mb-2 border-b pb-2 flex items-center justify-between">
+                    <span>Spatiotemporal Modeling & Continuous Track Trajectory Mechanics</span>
+                    <span class="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-1 rounded">Module 03</span>
+                </h2>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Static 2D image models lack temporal mechanics required to simulate dynamic steering flows, advection, and rapid vortex changes. This module examines spatiotemporal sequence modeling via ConvLSTM cells, self-attention Transformers, and the cutting-edge <strong>BaguanCyclone</strong> continuous probabilistic tracking formulation. Test the interactive Gaussian probability density refinement tool below to observe how continuous coordinate mapping eliminates grid discretization biases during storm center tracking.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Mathematical Formulation & BaguanCyclone Interactive Canvas Simulator -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-4">
+                    <div class="border-b pb-2">
+                        <h3 class="font-bold text-navy-950 text-base">BaguanCyclone Sub-Grid Probability Field Simulator</h3>
+                        <p class="text-xs text-slate-500">Truncated Gaussian Kernel & KL-Divergence Center Alignment</p>
+                    </div>
+
+                    <!-- LaTeX Mathematical Display Box -->
+                    <div class="bg-navy-950 text-slate-200 p-4 rounded-lg font-mono text-xs space-y-2 border border-slate-800">
+                        <div class="text-storm-teal font-bold">// Truncated Gaussian Field Mapping Formula</div>
+                        <div>$$\tilde{g}_{ij} = \begin{cases} \exp\left(-\frac{d_{ij}^2}{2\sigma^2}\right), & \text{if } d_{ij} \le r \\ 0, & \text{otherwise} \end{cases}$$</div>
+                        <div>$$\omega_{ij} = \frac{\tilde{g}_{ij}}{\sum_k \sum_l \tilde{g}_{kl}}, \quad \mathcal{L}_{KL} = D_{KL}(W_{gt} \,||\, \hat{W})$$</div>
+                    </div>
+
+                    <!-- Interactive Canvas Surface -->
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center text-xs text-slate-600">
+                            <span>Adjust Kernel Spread ($\sigma$):</span>
+                            <span id="sigma-val" class="font-mono font-bold text-storm-teal">1.5</span>
+                        </div>
+                        <input type="range" id="sigma-slider" min="0.5" max="3.5" step="0.1" value="1.5" oninput="updateGaussianSimulation()" class="w-full accent-storm-teal">
+
+                        <div class="relative bg-navy-900 rounded-lg overflow-hidden flex justify-center items-center p-2 border border-slate-800">
+                            <canvas id="gaussianCanvas" width="300" height="240" class="rounded bg-navy-950 cursor-crosshair"></canvas>
+                            <div class="absolute bottom-3 left-3 bg-navy-950/80 text-white font-mono text-[10px] p-2 rounded border border-slate-700">
+                                <div>Click canvas to relocate storm center</div>
+                                <div>Center: <span id="center-coords" class="text-storm-amber">X: 150, Y: 120</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ConvLSTM vs Spatiotemporal Transformers Structural Card -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-4">
+                    <h3 class="font-bold text-navy-950 text-base border-b pb-2">Spatiotemporal Architecture Synthesis</h3>
+
+                    <div class="space-y-4">
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <h4 class="font-bold text-sm text-navy-950 flex items-center justify-between">
+                                <span>ConvLSTM Networks (Manju et al., 2025/2026)</span>
+                                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-mono px-2 py-0.5 rounded">North Indian Ocean</span>
+                            </h4>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                                Replaces matrix multiplications inside LSTM recurrent gates with 2D convolutional kernels. Preserves explicit spatial coordinate manifolds across time sequences. Combined with VGG16/ResNet backbones, K-Means/DBSCAN center clustering, and SMOTE class balancing.
+                            </p>
+                            <div class="mt-3 grid grid-cols-3 gap-2 text-center text-xs font-mono">
+                                <div class="bg-white p-2 rounded border">
+                                    <div class="text-slate-400 text-[10px]">Detection</div>
+                                    <div class="font-bold text-navy-950">99.16%</div>
+                                </div>
+                                <div class="bg-white p-2 rounded border">
+                                    <div class="text-slate-400 text-[10px]">Classification</div>
+                                    <div class="font-bold text-navy-950">81.1%</div>
+                                </div>
+                                <div class="bg-white p-2 rounded border">
+                                    <div class="text-slate-400 text-[10px]">Wind RMSE</div>
+                                    <div class="font-bold text-storm-teal">7.79 kts</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                            <h4 class="font-bold text-sm text-navy-950 flex items-center justify-between">
+                                <span>Multimodal Foundation Models (Prithvi WxC)</span>
+                                <span class="bg-indigo-100 text-indigo-800 text-[10px] font-mono px-2 py-0.5 rounded">NASA-IBM 2.3B</span>
+                            </h4>
+                            <p class="text-xs text-slate-600 mt-2 leading-relaxed">
+                                Pretrained on 160 surface and atmospheric variables across 40 years of MERRA-2 reanalysis. Eliminates regional data scarcity by providing a physically coherent latent space for fine-tuning regional cyclone trajectory emulators.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SECTION 4: IMD BASELINES & SOCIO-ECONOMIC IMPACT ================= -->
+        <section id="section-imd-impact" class="hidden space-y-6">
+            <!-- Section Intro Paragraph -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h2 class="text-2xl font-bold text-navy-950 mb-2 border-b pb-2 flex items-center justify-between">
+                    <span>IMD Operational Forecast Verification & Socio-Economic Matrix</span>
+                    <span class="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-1 rounded">Module 04</span>
+                </h2>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    Operational validation of AI models in the North Indian Ocean basin require direct benchmarking against India Meteorological Department (IMD) / RSMC New Delhi standards. This module evaluates historical operational Direct Position Errors (DPE), intensity errors, and landfall point precision alongside long-term extreme weather mortality assessments (1970–2019) led by Mohapatra et al. and Ray et al.
+                </p>
+            </div>
+
+            <!-- Dynamic Forecast Horizon Selector & IMD Verification Chart -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Interactive Controls Panel -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-4">
+                    <h3 class="font-bold text-navy-950 text-base border-b pb-2">IMD Verification Benchmark</h3>
+                    <p class="text-xs text-slate-600">Select forecast lead time to examine historical modernization gains (2011–2015 vs 2016–2020) and AI target projections:</p>
+
+                    <div class="space-y-2">
+                        <button onclick="updateIMDHorizon(24)" id="btn-lead-24" class="lead-btn w-full text-left px-4 py-3 rounded-lg border border-storm-teal bg-storm-teal/10 font-mono text-xs flex justify-between items-center">
+                            <span>+24 Hours Lead Time</span>
+                            <span class="font-bold text-storm-teal">72–77 km DPE</span>
+                        </button>
+                        <button onclick="updateIMDHorizon(48)" id="btn-lead-48" class="lead-btn w-full text-left px-4 py-3 rounded-lg border border-slate-200 hover:border-slate-300 font-mono text-xs flex justify-between items-center">
+                            <span>+48 Hours Lead Time</span>
+                            <span class="font-bold text-slate-700">117 km DPE</span>
+                        </button>
+                        <button onclick="updateIMDHorizon(72)" id="btn-lead-72" class="lead-btn w-full text-left px-4 py-3 rounded-lg border border-slate-200 hover:border-slate-300 font-mono text-xs flex justify-between items-center">
+                            <span>+72 Hours Lead Time</span>
+                            <span class="font-bold text-slate-700">159 km DPE</span>
+                        </button>
+                    </div>
+
+                    <!-- Lead Time Metric Breakdown Card -->
+                    <div id="lead-breakdown-card" class="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-2 text-xs">
+                        <div class="font-bold text-navy-950 font-mono uppercase text-[11px]" id="lead-title">+24 Hours Horizon Details</div>
+                        <div class="flex justify-between py-1 border-b border-slate-200">
+                            <span class="text-slate-500">Historic LPA Track DPE (2011-2015):</span>
+                            <span class="font-mono font-bold" id="lead-historic">97 km</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-200">
+                            <span class="text-slate-500">Modern Period DPE (2016-2020):</span>
+                            <span class="font-mono font-bold text-storm-teal" id="lead-modern">72–77 km</span>
+                        </div>
+                        <div class="flex justify-between py-1 border-b border-slate-200">
+                            <span class="text-slate-500">Intensity Wind Error:</span>
+                            <span class="font-mono font-bold text-storm-amber" id="lead-intensity">8.0 kts</span>
+                        </div>
+                        <div class="flex justify-between py-1">
+                            <span class="text-slate-500">Landfall Point Error:</span>
+                            <span class="font-mono font-bold text-storm-emerald" id="lead-landfall">32 km</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- IMD Error Chart Container -->
+                <div class="lg:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-4">
+                    <h3 class="font-bold text-navy-950 text-base">IMD Operational Track Forecast Error Reduction Trend</h3>
+                    <div class="chart-container">
+                        <canvas id="imdErrorChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Socio-Economic Impact & Mortality Matrix -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Extreme Weather Mortality Chart -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-4">
+                    <h3 class="font-bold text-navy-950 text-base border-b pb-2">Extreme Weather Mortality Breakdown (1970–2019)</h3>
+                    <p class="text-xs text-slate-500">Ray et al. study based on official IMD extreme weather databases</p>
+                    <div class="chart-container" style="height:220px; max-height:240px;">
+                        <canvas id="mortalityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Key Impact Metric Cards -->
+                <div class="md:col-span-2 bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-4 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-navy-950 text-base border-b pb-2 mb-4">North Indian Ocean Coastal Vulnerability Index</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+                                <div class="text-xs font-mono text-emerald-800 uppercase font-bold">Mortality Rate Reduction</div>
+                                <div class="text-3xl font-bold font-mono text-emerald-900 mt-1">−94%</div>
+                                <div class="text-xs text-emerald-700 mt-1">Mortality rate drop per million population (2000–2019 vs 1980–1999) due to improved early warnings.</div>
+                            </div>
+
+                            <div class="bg-red-50 p-4 rounded-lg border border-red-200">
+                                <div class="text-xs font-mono text-red-800 uppercase font-bold">Economic Exposure Expansion</div>
+                                <div class="text-3xl font-bold font-mono text-red-900 mt-1">$14+ Billion</div>
+                                <div class="text-xs text-red-700 mt-1">Direct economic damages caused by Super Cyclone Amphan (May 2020), displacing 2.4M people.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 text-xs text-slate-600 leading-relaxed">
+                        <strong>Exposure Scale:</strong> Over <strong>262 million people</strong> reside across 96 coastal districts in India. Replacing 6-hour numerical batch update schedules with continuous 30-minute INSAT-3DR/3DS geostationary AI inferencing extends evacuation lead times, directly preventing catastrophic coastal casualties.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= SECTION 5: SIH 3-MODEL OPERATIONAL PIPELINE & WORKBENCH ================= -->
+        <section id="section-sih-pipeline" class="hidden space-y-6">
+            <!-- Section Intro Paragraph -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+                <h2 class="text-2xl font-bold text-navy-950 mb-2 border-b pb-2 flex items-center justify-between">
+                    <span>SIH Decoupled 3-Model Operational System Architecture</span>
+                    <span class="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-1 rounded">Module 05</span>
+                </h2>
+                <p class="text-slate-600 text-sm leading-relaxed">
+                    While unified single-network backbones offer theoretical simplicity, operational reliability requires a <strong>decoupled modular architecture</strong>. This section outlines our Smart India Hackathon (SIH) prototype pipeline, which separates detection, intensity classification, and dynamic trajectory forecasting into three specialized subsystems. Use the interactive pipeline simulator below to test raw geostationary inputs against the models.
+                </p>
+            </div>
+
+            <!-- Pipeline Visual Workflow Card -->
+            <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-6">
+                <h3 class="font-bold text-navy-950 text-base border-b pb-2">Decoupled Subsystem Pipeline Architecture</h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
+                    <!-- Model 1: Detection -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-300 relative hover:shadow-md transition-shadow">
+                        <div class="absolute -top-3 left-4 bg-storm-teal text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">Model Subsystem 01</div>
+                        <h4 class="font-bold text-slate-900 text-base mt-2">Vortex Center Detection</h4>
+                        <p class="text-xs font-mono text-storm-teal mb-3">YOLOv8 / K-Means DBSCAN Object Backbone</p>
+                        <ul class="text-xs text-slate-600 space-y-2 list-disc pl-4">
+                            <li><strong>Input:</strong> Raw INSAT-3D/3DR Thermal IR ($10.8\,\mu\text{m}$) imagery.</li>
+                            <li><strong>Operation:</strong> Pinpoints spatial low-level circulation center (LLCC).</li>
+                            <li><strong>Operational Defense:</strong> Remains robust even when vertical wind shear displaces upper convective canopy away from surface center.</li>
+                        </ul>
+                        <div class="mt-4 p-2 bg-white rounded border border-slate-200 text-[11px] font-mono text-slate-700">
+                            Output: Bounding Box Coordinates $[X_c, Y_c, W, H]$
+                        </div>
+                    </div>
+
+                    <!-- Model 2: Classification -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-300 relative hover:shadow-md transition-shadow">
+                        <div class="absolute -top-3 left-4 bg-storm-amber text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">Model Subsystem 02</div>
+                        <h4 class="font-bold text-slate-900 text-base mt-2">Cascaded Intensity Classifier</h4>
+                        <p class="text-xs font-mono text-storm-amber mb-3">TCICENet / Dvorak-Inspired Vision Transformer</p>
+                        <ul class="text-xs text-slate-600 space-y-2 list-disc pl-4">
+                            <li><strong>Input:</strong> Cropped $170 \times 170$ vortex patch + Scatterometer surface winds.</li>
+                            <li><strong>Operation:</strong> Stage classification (Depression $\rightarrow$ Super Cyclone) followed by wind regression.</li>
+                            <li><strong>Bias Reduction:</strong> Prevents peak wind underestimation common in naive MSE models.</li>
+                        </ul>
+                        <div class="mt-4 p-2 bg-white rounded border border-slate-200 text-[11px] font-mono text-slate-700">
+                            Output: Intensity Category & MSW (kts)
+                        </div>
+                    </div>
+
+                    <!-- Model 3: Trajectory Prediction -->
+                    <div class="bg-slate-50 p-5 rounded-xl border border-slate-300 relative hover:shadow-md transition-shadow">
+                        <div class="absolute -top-3 left-4 bg-storm-indigo text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded uppercase">Model Subsystem 03</div>
+                        <h4 class="font-bold text-slate-900 text-base mt-2">Spatiotemporal Track Forecast</h4>
+                        <p class="text-xs font-mono text-storm-indigo mb-3">ConvLSTM + BaguanCyclone Probabilistic Kernel</p>
+                        <ul class="text-xs text-slate-600 space-y-2 list-disc pl-4">
+                            <li><strong>Input:</strong> Sequential 24h satellite track history + ERA5 steering flows.</li>
+                            <li><strong>Operation:</strong> Generates continuous probability field output map over +72h window.</li>
+                            <li><strong>Physics Coupling:</strong> Couples latent satellite track with NWP steering vectors.</li>
+                        </ul>
+                        <div class="mt-4 p-2 bg-white rounded border border-slate-200 text-[11px] font-mono text-slate-700">
+                            Output: Probabilistic Cone & Coordinate Vectors
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Subsystem Simulator & Stack Tool Matrix -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Interactive Subsystem Test Console -->
+                <div class="bg-navy-950 text-white rounded-xl p-6 shadow-sm border border-slate-800 space-y-4">
+                    <div class="flex justify-between items-center border-b border-slate-800 pb-2">
+                        <h3 class="font-bold text-sm text-storm-teal font-mono">LIVE PIPELINE EXECUTION SIMULATOR</h3>
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-mono bg-emerald-950 text-emerald-400 border border-emerald-800">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse mr-1"></span> RUNTIME READY
+                        </span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <label class="text-xs text-slate-400 block">Select Sample Geostationary Feed (INSAT-3DR):</label>
+                        <select id="sim-sample-select" onchange="runPipelineSimulation()" class="w-full bg-navy-900 border border-slate-700 rounded px-3 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-storm-teal">
+                            <option value="bob01">BOB-01 (Very Severe Cyclonic Storm - Bay of Bengal)</option>
+                            <option value="arb02">ARB-02 (Extremely Severe Cyclonic Storm - Arabian Sea)</option>
+                            <option value="dep03">DEP-03 (Deep Depression - Pre-Monsoon)</option>
+                        </select>
+
+                        <div id="sim-output-console" class="bg-navy-900 p-4 rounded-lg font-mono text-xs space-y-2 border border-slate-800 text-slate-300 min-h-[180px]">
+                            <!-- Dynamically updated by JS -->
+                        </div>
+
+                        <button onclick="runPipelineSimulation()" class="w-full bg-storm-teal hover:bg-sky-500 text-white font-mono text-xs font-bold py-2 rounded transition-colors shadow">
+                            RE-RUN INFERENCE PIPELINE
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SIH Technology Stack Summary -->
+                <div class="bg-white rounded-xl p-6 shadow-sm border border-slate-200 space-y-4">
+                    <h3 class="font-bold text-navy-950 text-base border-b pb-2">SIH Prototype Technology Stack</h3>
+                    
+                    <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <div class="font-mono font-bold text-navy-950">Data Ingestion</div>
+                            <div class="text-slate-600 mt-1">MOSDAC INSAT-3D/3DR, IBTrACS, ERA5 Reanalysis, ASCAT</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <div class="font-mono font-bold text-navy-950">Preprocessing</div>
+                            <div class="text-slate-600 mt-1">Satpy, GDAL, Rasterio, xarray, OpenCV Albumentations</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <div class="font-mono font-bold text-navy-950">Deep Learning</div>
+                            <div class="text-slate-600 mt-1">PyTorch, Timm (ViT backbones), ConvLSTM, Prithvi WxC</div>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded border border-slate-200">
+                            <div class="font-mono font-bold text-navy-950">Frontend Dashboard</div>
+                            <div class="text-slate-600 mt-1">React, Leaflet.js, Chart.js, Tailwind CSS, IBM Plex Mono</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-navy-950 text-slate-400 text-xs py-6 border-t border-slate-800 mt-12">
+        <div class="container mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div>
+                <span class="font-bold text-white font-mono">SIH 2026 Tropical Cyclone Research Dashboard</span>
+                <span class="mx-2">•</span>
+                <span>Based on RSMC New Delhi & Literature Benchmarks</span>
+            </div>
+            <div class="font-mono text-slate-500">
+                Data Sources: IBTrACS | MOSDAC | IMD Verification | MERRA-2
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // ================= GLOBAL STATE =================
+        let currentTab = 'overview';
+        let modelChartInstance = null;
+        let imdChartInstance = null;
+        let mortalityChartInstance = null;
+
+        // Literature Models Dataset
+        const modelTableData = [
+            {
+                name: "Pradhan et al. (2018)",
+                arch: "Multi-layer 2D-CNN",
+                type: "cnn",
+                sources: "Geostationary IR imagery",
+                scale: "Global best-track archives",
+                metrics: "End-to-end features",
+                innovation: "Eliminates manual Dvorak shape descriptors; direct radiometer learning."
+            },
+            {
+                name: "CNN-TC (Chen et al., 2019)",
+                arch: "Rotation-Blended CNN",
+                type: "cnn",
+                sources: "Multi-channel geostationary IR",
+                scale: "Multi-basin historical cyclones",
+                metrics: "RMSE = 4.06 m/s (7.89 kts), MAE = 3.23 m/s",
+                innovation: "Multi-angle rotational ensemble sampling matching rotational vortex symmetry."
+            },
+            {
+                name: "TCICENet (Zhang et al., 2021)",
+                arch: "Cascaded CNN (TCIC + TCIE)",
+                type: "cnn",
+                sources: "Geostationary IR (170×170 crop)",
+                scale: "1,001 TCs (1981–2019), NW Pacific",
+                metrics: "RMSE = 8.60 kts, MAE = 6.67 kts",
+                innovation: "Decouples classification from fine-grained regression; error propagation."
+            },
+            {
+                name: "MTCIE (2024)",
+                arch: "Dual-branch Vision Transformer",
+                type: "transformer",
+                sources: "IR (HURSAT-B1) + Microwave (HURSAT-MW)",
+                scale: "Global multi-platform satellite records",
+                metrics: "MAE = 7.42 kts",
+                innovation: "Cross-attention fusion between IR cloud tops and passive microwave rainband structures."
+            },
+            {
+                name: "RTCC-Net (Tian et al., 2026)",
+                arch: "ResNet + Spatial Self-Attention",
+                type: "transformer",
+                sources: "Polar coordinate IR cloud clusters",
+                scale: "Multi-decade tropical cluster archive",
+                metrics: "99.4% genesis detection, 0.36% false alarm",
+                innovation: "Early tropical cyclogenesis detection 24 hours prior to technical genesis."
+            },
+            {
+                name: "Manju et al. (2025/2026)",
+                arch: "Hybrid VGG16/ResNet + ConvLSTM",
+                type: "hybrid",
+                sources: "CIMSS & IMD best-track IR imagery",
+                scale: "North Indian Ocean (NIO) cyclones",
+                metrics: "Detection: 99.16%, Wind RMSE = 7.79 kts",
+                innovation: "K-Means/DBSCAN storm center isolation paired with SMOTE class rebalancing."
+            }
+        ];
+
+        // ================= NAVIGATION TAB SWITCHER =================
+        function switchTab(tabId) {
+            currentTab = tabId;
+            document.querySelectorAll('main > section').forEach(sec => sec.classList.add('hidden'));
+            document.getElementById(`section-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('bg-storm-teal', 'text-white');
+                btn.classList.add('text-slate-300', 'hover:bg-navy-800');
+            });
+            const activeBtn = document.getElementById(`nav-${tabId}`);
+            activeBtn.classList.add('bg-storm-teal', 'text-white');
+            activeBtn.classList.remove('text-slate-300', 'hover:bg-navy-800');
+
+            // Trigger canvas or chart refreshes on tab open
+            if (tabId === 'models') {
+                renderModelTable('all');
+                renderModelChart('all');
+            } else if (tabId === 'spatiotemporal') {
+                initGaussianSimulation();
+            } else if (tabId === 'imd-impact') {
+                renderIMDChart();
+                renderMortalityChart();
+            } else if (tabId === 'sih-pipeline') {
+                runPipelineSimulation();
+            }
+        }
+
+        // ================= MODULE 1: DVORAK VS DEEP LEARNING TOGGLE =================
+        function toggleDvorakView(view) {
+            const dvorakBox = document.getElementById('dvorak-content');
+            const dlBox = document.getElementById('dl-content');
+            const btnDvorak = document.getElementById('btn-view-dvorak');
+            const btnDl = document.getElementById('btn-view-dl');
+
+            if (view === 'dvorak') {
+                dvorakBox.classList.remove('hidden');
+                dlBox.classList.add('hidden');
+                btnDvorak.className = "px-3 py-1 text-xs font-semibold rounded bg-navy-950 text-white";
+                btnDl.className = "px-3 py-1 text-xs font-semibold rounded bg-slate-100 text-slate-700 hover:bg-slate-200";
+            } else {
+                dvorakBox.classList.add('hidden');
+                dlBox.classList.remove('hidden');
+                btnDl.className = "px-3 py-1 text-xs font-semibold rounded bg-navy-950 text-white";
+                btnDvorak.className = "px-3 py-1 text-xs font-semibold rounded bg-slate-100 text-slate-700 hover:bg-slate-200";
+            }
+        }
+
+        // ================= MODULE 2: ARCHITECTURE BENCHMARK & FILTER =================
+        function renderModelTable(filter) {
+            const tbody = document.getElementById('model-table-body');
+            tbody.innerHTML = '';
+
+            const filteredData = filter === 'all' ? modelTableData : modelTableData.filter(d => d.type === filter);
+
+            filteredData.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-3 font-bold text-navy-950">${row.name}</td>
+                    <td class="p-3 font-mono text-[11px] text-storm-teal">${row.arch}</td>
+                    <td class="p-3">${row.sources}</td>
+                    <td class="p-3">${row.scale}</td>
+                    <td class="p-3 font-mono font-bold text-slate-900">${row.metrics}</td>
+                    <td class="p-3 text-slate-600">${row.innovation}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function filterModelBenchmark() {
+            const val = document.getElementById('model-filter').value;
+            renderModelTable(val);
+            renderModelChart(val);
+        }
+
+        function renderModelChart(filter) {
+            const ctx = document.getElementById('modelBenchmarkChart').getContext('2d');
+            if (modelChartInstance) modelChartInstance.destroy();
+
+            const models = [
+                { name: "CNN-TC (Chen)", mae: 6.27, rmse: 7.89, type: "cnn" },
+                { name: "TCICENet (Zhang)", mae: 6.67, rmse: 8.60, type: "cnn" },
+                { name: "MTCIE (ViT)", mae: 7.42, rmse: 9.10, type: "transformer" },
+                { name: "ConvLSTM (Manju)", mae: 6.10, rmse: 7.79, type: "hybrid" }
+            ];
+
+            const activeModels = filter === 'all' ? models : models.filter(m => m.type === filter);
+
+            modelChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: activeModels.map(m => m.name.length > 16 ? m.name.substring(0, 16) + '...' : m.name),
+                    datasets: [
+                        {
+                            label: 'MAE (kts)',
+                            data: activeModels.map(m => m.mae),
+                            backgroundColor: 'rgba(14, 165, 233, 0.75)',
+                            borderColor: '#0EA5E9',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'RMSE (kts)',
+                            data: activeModels.map(m => m.rmse),
+                            backgroundColor: 'rgba(245, 158, 11, 0.75)',
+                            borderColor: '#F59E0B',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { font: { size: 11, family: 'Inter' } } },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    return context.dataset.label + ': ' + context.parsed.y + ' kts';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Error Magnitude (Knots)', font: { size: 11, family: 'Inter' } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ================= MODULE 3: BAGUANCYLONE GAUSSIAN KERNEL SIMULATOR =================
+        let simCenterX = 150;
+        let simCenterY = 120;
+
+        function initGaussianSimulation() {
+            const canvas = document.getElementById('gaussianCanvas');
+            canvas.addEventListener('click', function(e) {
+                const rect = canvas.getBoundingClientRect();
+                simCenterX = e.clientX - rect.left;
+                simCenterY = e.clientY - rect.top;
+                document.getElementById('center-coords').innerText = `X: ${Math.round(simCenterX)}, Y: ${Math.round(simCenterY)}`;
+                updateGaussianSimulation();
+            });
+            updateGaussianSimulation();
+        }
+
+        function updateGaussianSimulation() {
+            const canvas = document.getElementById('gaussianCanvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const sigma = parseFloat(document.getElementById('sigma-slider').value);
+            document.getElementById('sigma-val').innerText = sigma.toFixed(1);
+
+            const width = canvas.width;
+            const height = canvas.height;
+            const imgData = ctx.createImageData(width, height);
+
+            const radius = sigma * 35; // Visual scaling factor
+
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const dx = x - simCenterX;
+                    const dy = y - simCenterY;
+                    const distSq = dx * dx + dy * dy;
+
+                    let intensity = 0;
+                    if (distSq <= radius * radius) {
+                        intensity = Math.exp(-distSq / (2 * (sigma * 15) * (sigma * 15)));
+                    }
+
+                    const index = (y * width + x) * 4;
+                    // Dark navy to vibrant cyan/amber heat scale
+                    imgData.data[index] = Math.min(255, intensity * 245);     // R (Amber accent)
+                    imgData.data[index + 1] = Math.min(255, intensity * 165); // G
+                    imgData.data[index + 2] = Math.min(255, 233 * (1 - intensity)); // B (Ocean blue base)
+                    imgData.data[index + 3] = 255; // Alpha
+                }
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+
+            // Draw center marker crosshair
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(simCenterX, simCenterY, 4, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+
+        // ================= MODULE 4: IMD HORIZON & MORTALITY CHARTS =================
+        function updateIMDHorizon(hours) {
+            document.querySelectorAll('.lead-btn').forEach(btn => {
+                btn.className = "lead-btn w-full text-left px-4 py-3 rounded-lg border border-slate-200 hover:border-slate-300 font-mono text-xs flex justify-between items-center";
+            });
+            const activeBtn = document.getElementById(`btn-lead-${hours}`);
+            activeBtn.className = "lead-btn w-full text-left px-4 py-3 rounded-lg border border-storm-teal bg-storm-teal/10 font-mono text-xs flex justify-between items-center";
+
+            const title = document.getElementById('lead-title');
+            const historic = document.getElementById('lead-historic');
+            const modern = document.getElementById('lead-modern');
+            const intensity = document.getElementById('lead-intensity');
+            const landfall = document.getElementById('lead-landfall');
+
+            if (hours === 24) {
+                title.innerText = "+24 Hours Horizon Details";
+                historic.innerText = "97 km";
+                modern.innerText = "72–77 km";
+                intensity.innerText = "8.0 kts";
+                landfall.innerText = "32 km";
+            } else if (hours === 48) {
+                title.innerText = "+48 Hours Horizon Details";
+                historic.innerText = "145 km";
+                modern.innerText = "117 km";
+                intensity.innerText = "11.0 kts";
+                landfall.innerText = "62 km";
+            } else if (hours === 72) {
+                title.innerText = "+72 Hours Horizon Details";
+                historic.innerText = "183 km";
+                modern.innerText = "159 km";
+                intensity.innerText = "14.0 kts";
+                landfall.innerText = "92 km";
+            }
+        }
+
+        function renderIMDChart() {
+            const ctx = document.getElementById('imdErrorChart').getContext('2d');
+            if (imdChartInstance) imdChartInstance.destroy();
+
+            imdChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['+24 Hours Lead', '+48 Hours Lead', '+72 Hours Lead'],
+                    datasets: [
+                        {
+                            label: 'Historic LPA (2011–2015) DPE (km)',
+                            data: [97, 145, 183],
+                            backgroundColor: 'rgba(148, 163, 184, 0.6)'
+                        },
+                        {
+                            label: 'Modern Period (2016–2020) DPE (km)',
+                            data: [77, 117, 159],
+                            backgroundColor: 'rgba(14, 165, 233, 0.85)'
+                        },
+                        {
+                            label: 'AI Sub-Grid Target Projection (km)',
+                            data: [35, 62, 92],
+                            backgroundColor: 'rgba(16, 185, 129, 0.85)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'top', labels: { font: { size: 11, family: 'Inter' } } }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Direct Position Error (DPE in km)', font: { size: 11 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        function renderMortalityChart() {
+            const ctx = document.getElementById('mortalityChart').getContext('2d');
+            if (mortalityChartInstance) mortalityChartInstance.destroy();
+
+            mortalityChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Riverine Floods (46.1%)', 'Tropical Cyclones (28.6%)', 'Other Extremes (25.3%)'],
+                    datasets: [{
+                        data: [46.1, 28.6, 25.3],
+                        backgroundColor: ['#0EA5E9', '#EF4444', '#CBD5E1']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { size: 10, family: 'Inter' } } }
+                    }
+                }
+            });
+        }
+
+        // ================= MODULE 5: LIVE PIPELINE EXECUTION SIMULATOR =================
+        function runPipelineSimulation() {
+            const sample = document.getElementById('sim-sample-select').value;
+            const consoleBox = document.getElementById('sim-output-console');
+
+            consoleBox.innerHTML = `<div class="text-storm-teal">[SYSTEM] Initializing multi-source ingestion pipeline...</div>`;
+
+            setTimeout(() => {
+                let log = "";
+                if (sample === 'bob01') {
+                    log = `
+                        <div class="text-slate-400">[00:00.2] Ingested INSAT-3DR IR Channel (10.8µm) + ASCAT Surface Vectors</div>
+                        <div class="text-storm-teal">[00:00.5] Model 01 (YOLO Center Detector): LLCC located at 16.4°N, 88.2°E</div>
+                        <div class="text-storm-amber">[00:00.8] Model 02 (Cascaded Classifier): Classified VSCS | Wind: 85 kts | MSLP: 976 hPa</div>
+                        <div class="text-storm-emerald">[00:01.2] Model 03 (ConvLSTM + BaguanCyclone): Track forecasted toward West Bengal coast. Landfall ETA: +38 hrs.</div>
+                    `;
+                } else if (sample === 'arb02') {
+                    log = `
+                        <div class="text-slate-400">[00:00.2] Ingested INSAT-3DR IR + Microwave (85 GHz rainband feed)</div>
+                        <div class="text-storm-teal">[00:00.5] Model 01 (YOLO Center Detector): Eye center pinpointed at 14.2°N, 66.8°E</div>
+                        <div class="text-storm-amber">[00:00.8] Model 02 (Cascaded Classifier): Classified ESCS | Wind: 110 kts | MSLP: 954 hPa</div>
+                        <div class="text-storm-emerald">[00:01.2] Model 03 (ConvLSTM + BaguanCyclone): Recurving track path projected toward Gujarat coast.</div>
+                    `;
+                } else {
+                    log = `
+                        <div class="text-slate-400">[00:00.2] Ingested INSAT-3D Pre-Monsoon Cloud Cluster Feed</div>
+                        <div class="text-storm-teal">[00:00.5] Model 01 (YOLO Center Detector): Broad vortex envelope at 11.5°N, 84.0°E</div>
+                        <div class="text-storm-amber">[00:00.8] Model 02 (Cascaded Classifier): Classified Deep Depression | Wind: 30 kts | MSLP: 1002 hPa</div>
+                        <div class="text-storm-emerald">[00:01.2] Model 03 (ConvLSTM + BaguanCyclone): Slow northwestward advection. RI risk: Moderate.</div>
+                    `;
+                }
+                consoleBox.innerHTML = log;
+            }, 300);
+        }
+
+        // ================= APPLICATION INITIALIZATION =================
+        window.addEventListener('DOMContentLoaded', () => {
+            // Render default view table & chart on load
+            renderModelTable('all');
+        });
+    </script>
+</body>
+</html>
