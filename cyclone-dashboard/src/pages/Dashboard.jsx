@@ -21,17 +21,17 @@ export default function Dashboard() {
   return (
     <div className="space-y-4 pb-12">
       {/* SIH Official Problem Statement Alignment Banner */}
-      <div className="bg-gradient-to-r from-sky-950 via-slate-900 to-indigo-950 border border-sky-500/50 px-4 py-2 rounded text-[11px] font-mono text-sky-200 flex flex-wrap items-center justify-between gap-2 shadow-md">
+      <div className="bg-gradient-to-r from-sky-50 via-slate-50 to-indigo-50 dark:from-sky-950 dark:via-slate-900 dark:to-indigo-950 border border-sky-200/90 dark:border-sky-500/50 px-4 py-2 rounded text-[11px] font-mono text-sky-900 dark:text-sky-200 flex flex-wrap items-center justify-between gap-2 shadow-xs dark:shadow-md transition-colors duration-150">
         <div className="flex items-center gap-2">
-          <span className="px-2 py-0.5 bg-sky-500 text-slate-950 font-bold rounded text-[10px] tracking-wide">
+          <span className="px-2 py-0.5 bg-sky-600 dark:bg-sky-500 text-white dark:text-slate-950 font-bold rounded text-[10px] tracking-wide">
             SIH PROBLEM STATEMENT
           </span>
-          <span className="font-semibold text-slate-200">
+          <span className="font-semibold text-slate-800 dark:text-slate-200">
             AI/ML System for Identification, Classification &amp; Prediction of Tropical Cyclone Patterns using Multi-Source Satellite Data
           </span>
         </div>
-        <div className="text-emerald-400 font-bold text-[10px] flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+        <div className="text-emerald-700 dark:text-emerald-400 font-bold text-[10px] flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 dark:bg-emerald-400 animate-pulse" />
           TRL 5 OPERATIONAL ENVIRONMENT (ISRO MOSDAC + NOAA IBTrACS)
         </div>
       </div>
