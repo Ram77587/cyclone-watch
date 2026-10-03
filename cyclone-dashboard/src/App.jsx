@@ -1,5 +1,6 @@
 // src/App.jsx
 import React from "react";
+import { Analytics } from "@vercel/analytics/react";
 import Navbar from "./components/layout/Navbar";
 import Footer from "./components/layout/Footer";
 import AlertBanner from "./components/alerts/AlertBanner";
@@ -18,6 +19,7 @@ export default function App() {
         <AppRoutes />
       </main>
       <Footer />
+      <Analytics />
     </div>
   );
 }
